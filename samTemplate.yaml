@@ -1,0 +1,16 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Outputs the time
+Resources:
+  AppSyncFuntion:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers.handler
+      Runtime: nodejs6.10
+      CodeUri: ./
+      Events:
+        AppSyncApiCICD:
+          Type: Api
+          Properties:
+            Path: /appsyncDB
+            Method: GET
