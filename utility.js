@@ -20,13 +20,6 @@ class utility {
         return this.getTopicQuery()
             .then(res => {
                 if (res) {
-                    res.data.canonical.hasPart.parts.map((item, index) => {
-                        returnData.item.push({ id: index, tegId: item.tegID, headline: item.headline, can: item.url.canonical })
-                    })
-                }
-
-
-                if (res) {
                     //console.log("RES-----" + res + "-----" + topic + "-----" + "------" + size)
                     console.log("RES-----" + res.status + "----");
                     if (res.response) {
