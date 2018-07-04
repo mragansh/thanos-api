@@ -12,38 +12,53 @@ const graphQlUrl = {
 class utility {
     constructor() {
     }
-    getDataFromUrl(url, callback) {
-        return this.scrapeData("https://www.economist.com/", {
-            title: ".sections-card__list"
-        }, (err, data) => {
-            callback(this.getlinkHref(data))
-        })
-    }
-    scrapeData(url, data, cb) {
-        tinreq(url, (err, body) => {
-            if (err) { return cb(err); }
-            let $ = cheerio.load(body), pageData = {};
-            Object.keys(data).forEach(k => {
-                pageData[k] = $(data[k]).html();
-            });
-            cb(null, pageData);
-        });
-    }
-
-    getlinkHref(data) {
-        let returndata = [];
-        if (data) {
-            data.title.split("</li>").map((item, index) => {
-                if (item.match(/href="([^"]*")/)) {
-                    let href = item.match(/href="([^"]*")/)[1].replace('/sections', '').replace('/', '').replace('\"', '');
-                    let topicName = item.match(/\>(.*?)\</g)[1].replace('>', '').replace('<', '');
-                    returndata.push({ key: topicName, value: href })
-                }
-            })
+    getDataForMainTopic() {
+        let returnData = {
+            item: []
         }
-        return returndata;
-    }
 
+        return this.getTopicQuery()
+            .then(res => {
+                if (res) {
+                    res.data.canonical.hasPart.parts.map((item, index) => {
+                        returnData.item.push({ id: index, tegId: item.tegID, headline: item.headline, can: item.url.canonical })
+                    })
+                }
+
+
+                if (res) {
+                    //console.log("RES-----" + res + "-----" + topic + "-----" + "------" + size)
+                    console.log("RES-----" + res.status + "----");
+                    if (res.response) {
+                        let count = 0;
+                        res.response.data.canonical.hasPart.parts.map((item, index) => {
+                            if (item.tegID) {
+
+                                if (count < size) {
+                                    count++;
+                                    returnData.item.push({ id: index, tegId: item.tegID, headline: item.headline, can: item.url.canonical })
+
+                                }
+
+                            }
+
+                        })
+                    } else {
+                        let count2 = 0;
+                        res.canonical.hasPart.parts.map((item, index) => {
+                            if (item.tegID) {
+                                if (count2 < size) {
+                                    count2++;
+                                    returnData.item.push({ id: index, tegId: item.tegID, headline: item.headline, can: item.url.canonical })
+                                }
+                            }
+                        })
+                    }
+
+                }
+                return returnData;
+            })
+    }
     getDataFromXml(size) {
         let returnData = { item: [] }
 
@@ -69,7 +84,7 @@ class utility {
         let returnData = {
             item: []
         }
-        return this.getDataFromGraphQLEconomist(topic).then(res => {
+        return this.getDataFromGraphQLEconomist(tegID).then(res => {
             if (res) {
                 //console.log("RES-----" + res + "-----" + topic + "-----" + "------" + size)
                 console.log("RES-----" + res.status + "----");
@@ -81,7 +96,7 @@ class utility {
                                 if (item.audio.main.url.canonical) {
                                     if (count < size) {
                                         count++;
-                                        returnData.item.push({ id: count, tegID: item.tegID, audio: item.audio.main.url.canonical, title: item.title, published: item.published })
+                                        returnData.item.push({ id: count, tegID: item.tegID, audio: item.audio.main.url.canonical })
 
                                     }
 
@@ -97,7 +112,7 @@ class utility {
                             if (item.audio.main) {
                                 if (count2 < size) {
                                     count2++;
-                                    returnData.item.push({ id: index, tegID: item.tegID, audio: item.audio.main.url.canonical, title: item.title, published: item.published })
+                                    returnData.item.push({ id: index, tegID: item.tegID, audio: item.audio.main.url.canonical })
                                 }
                             }
                         }
@@ -108,38 +123,61 @@ class utility {
             return returnData;
         })
     }
+    getTopicQuery() {
+        let url = graphQlUrl.stage;
+        let size = 50;
+        const query = `{
+            canonical(ref: "/xref/stage.economist.com/topics") {
+              tegID
+              headline
+              hasPart{
+                parts{
+                  tegID
+                  headline
+                  url {
+                    canonical
+                  }        
+                  
+                }
+              }
+              
+            }
+          }`;
 
-    getDataFromGraphQLEconomist(topic) {
+        var dataWithPromise = request(url, query).then(response => {
+            console.log("--------graphQlUrlgraphQlUrlgraphQlUrl----", JSON.stringify(response), "--query--", query);
+            return response;
+        }).catch(error => {
+            console.log("--------errorerrorerrorerrorerrorerrorerror----", JSON.stringify(error.response), "--query--", query);
+            return error;
+        });
+        return dataWithPromise
+
+    }
+    getDataFromGraphQLEconomist(tegID) {
         // TODO: Change URL per enviorment and size too.
         let url = graphQlUrl.stage;
         let size = 50;
         const query = `{
-      canonical(ref: "/xref/stage.economist.com/sections/${topic}") {
-        hasPart (size:${size}){
-      parts {
-        tegID
-        audio {
-          main {
-            id
-            url {
-              canonical
+            canonical(ref: "/content/${tegID}") {
+              title: headline
+              published: datePublished
+              lastModified: dateModified
+              hasPart(size: 50) {
+                parts {
+                  tegID
+                  audio {
+                    main {
+                      id
+                      url {
+                        canonical
+                      }
+                    }
+                  }
+                }
+              }
             }
-          }
-        }
-        title: headline
-        published: datePublished
-        lastModified: dateModified
-        print {
-          section {
-            id
-            tegID
-            sectionName: headline
-          }
-        }
-      }
-    }
-      }
-    }`;
+          }`;
 
         var dataWithPromise = request(url, query).then(response => {
             console.log("--------graphQlUrlgraphQlUrlgraphQlUrl----", JSON.stringify(response), "--query--", query);

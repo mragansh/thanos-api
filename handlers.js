@@ -21,6 +21,7 @@ const responses = {
 
 
 exports.handler = (event, context, callback) => {
+    
     let _util = new util;
     switch (event.field) {
         case "getAllDataFromXMLRSS":
@@ -32,14 +33,14 @@ exports.handler = (event, context, callback) => {
             })
 
         case "getDataByTopics":
-            _util.getDataByTopics(event.arguments.size, event.arguments.topic).then(data => {
+            _util.getDataByTopics(event.arguments.size, event.arguments.tegID).then(data => {
                 console.log('=> Promise data: ', JSON.stringify(data));
                 callback(null, data.item);
             }).catch(error => {
                 console.log('=> Error in Promise :', error);
             })
         case "getMainTopics":
-            _util.getDataFromUrl("event.arguments.url", function (data) {
+            _util.getDataForMainTopic("event.arguments.url", function (data) {
                 console.log({ "data": data })
                 if (event.field == 'getMainTopics') {
                     callback(null, { "data": data })
