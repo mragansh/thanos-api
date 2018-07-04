@@ -16,7 +16,6 @@ class utility {
         let returnData = {
             item: []
         }
-
         return this.getTopicQuery()
             .then(res => {
                 if (res) {
@@ -29,7 +28,7 @@ class utility {
 
                                 if (count < size) {
                                     count++;
-                                    returnData.item.push({ id: index, tegId: item.tegID, headline: item.headline, can: item.url.canonical })
+                                    returnData.item.push({ id: count, tegId: item.tegID, headline: item.headline, can: item.url.canonical })
 
                                 }
 
@@ -73,7 +72,7 @@ class utility {
             })
     }
 
-    getDataByTopics(size, topic) {
+    getDataByTopics(size, tegID) {
         let returnData = {
             item: []
         }
