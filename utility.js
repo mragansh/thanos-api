@@ -12,7 +12,7 @@ const graphQlUrl = {
 class utility {
     constructor() {
     }
-    getDataForMainTopic() {
+    getDataForMainTopic(size) {
         let returnData = {
             item: []
         }
