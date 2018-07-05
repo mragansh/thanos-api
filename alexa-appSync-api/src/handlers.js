@@ -19,32 +19,34 @@ const responses = {
     }
 }
 
-
 exports.handler = (event, context, callback) => {
 
     let _util = new util;
-    switch (event.field) {
-        case "getAllDataFromXMLRSS":
+    if (event.field) {
+        if(event.field=="getAllDataFromXMLRSS"){
             _util.getDataFromXml(event.arguments.size).then(data => {
                 console.log('=> Promise data: ', JSON.stringify(data));
                 callback(null, data.item);
             }).catch(error => {
                 console.log('=> Error in Promise :', error);
             })
+        }
 
-        case "getDataByTopics":
+        if(event.field=="getDataByTopics"){
             _util.getDataByTopics(event.arguments.size, event.arguments.tegID).then(data => {
                 console.log('=> Promise data: ', JSON.stringify(data));
                 callback(null, data.item);
             }).catch(error => {
                 console.log('=> Error in Promise :', error);
             })
-        case "getMainTopics":
+        }
+        if(event.field=="getMainTopics"){
             _util.getDataForMainTopic(event.arguments.size).then(data => {
                 console.log('=> Promise data: ', JSON.stringify(data));
                 callback(null, data.item);
             }).catch(error => {
                 console.log('=> Error in Promise :', error);
             });
+        }
     }
 };
