@@ -54,7 +54,7 @@ class utility {
     getDataFromXml(size) {
         let returnData = { item: [] }
 
-        return fetch('https://acast.azure-api.net/rssEconomist/theeconomisttastingmenu?subscription-key=d67d08ad7d2f4843835cf50c3f280890')
+        return fetch('https://')
             .then(res => res.text())
             .then(body => {
                 console.log(body)
@@ -119,7 +119,7 @@ class utility {
         let url = graphQlUrl.stage;
         let size = 50;
         const query = `{
-            canonical(ref: "/xref/stage.economist.com/topics") {
+            canonical(ref: "") {
               tegID
               headline
               hasPart{
